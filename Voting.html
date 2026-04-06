@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Voting App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #111;
+    color: white;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+input {
+    padding: 10px;
+    width: 250px;
+    margin: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+button {
+    padding: 10px 20px;
+    background: orange;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+video {
+    margin-top: 20px;
+    width: 300px;
+    border-radius: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+.vote-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.party {
+    background: #222;
+    padding: 15px;
+    width: 320px;
+    border-radius: 10px;
+}
+
+#finalPage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: none; /* 👈 ye important hai */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 30px;
+}
+
+#finalText {
+    color: #00ffcc;
+    text-align: center;
+    animation: zoom 1s ease;
+}
+
+@keyframes zoom {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+#step2 {
+    transition: 0.3s;
+}
+
+#step2 h3 {
+    font-size: 22px;
+}
+
+#step2 p {
+    opacity: 0.7;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🗳️ Voting App</h2>
+
+<!-- Aadhaar Input -->
+<div id="step1">
+    <h3>Enter Aadhaar Number</h3>
+    <input type="text" id="aadhaar" placeholder="Enter 12 digit Aadhaar"><br>
+    <button onclick="verifyAadhaar()">Verify</button>
+</div>
+
+<div id="step2" class="hidden">
+    <h3>🔐 Face Verification</h3>
+
+    <video id="video" autoplay muted></video>
+    <br><br>
+
+    <button onclick="startFaceLock()">Start Face Scan</button>
+</div>
+
+<!-- Voting -->
+<div id="step3" class="hidden">
+    <h3>Vote for your Candidate</h3>
+    <div class="vote-box">
+
+    <!-- BJP -->
+    <div class="party">
+        <img src="kamal.jfif" width="120px" class="symbol">
+        <h3>भारतीय जनता पार्टी (BJP)</h3>
+        <button onclick="vote('BJP')">Vote</button>
+    </div>
+
+    <!-- AAP -->
+    <div class="party">
+        <img src="jhadu.jfif" width="120px" class="symbol">
+        <h3>आम आदमी पार्टी (AAP)</h3>
+        <button onclick="vote('AAP')">Vote</button>
+    </div>
+
+    <!-- Congress -->
+    <div class="party">
+        <img src="hath.jfif" width="120px" class="symbol">
+        <h3>भारतीय राष्ट्रीय कांग्रेस</h3>
+        <button onclick="vote('Congress')">Vote</button>
+    </div>
+
+    <!-- SP -->
+    <div class="party">
+        <img src="cycle.jfif" width="120px" class="symbol">
+        <h3>समाजवादी पार्टी</h3>
+        <button onclick="vote('SP')">Vote</button>
+    </div>
+
+</div>
+</div>
+
+<h3 id="result"></h3>
+
+<div id="finalPage" class="hidden">
+    <h1 id="finalText"></h1>
+</div>
+
+<audio id="sound" src="https://www.fesliyanstudios.com/play-mp3/4386" preload="auto"></audio>
+
+
+
+</div>
+
+
+<script>
+
+// Aadhaar Verify (Demo Only)
+function verifyAadhaar() {
+    let aadhaar = document.getElementById("aadhaar").value;
+
+    if(aadhaar.length === 12) {
+        document.getElementById("step1").classList.add("hidden");
+        document.getElementById("step2").classList.remove("hidden");
+    } else {
+        alert("Invalid Aadhaar Number");
+    }
+}
+
+// Camera Start
+function startCamera() {
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+        document.getElementById("video").srcObject = stream;
+    });
+}
+
+// Fake Face Verify
+function faceVerified() {
+    alert("Face Verified (Demo)");
+    document.getElementById("step2").classList.add("hidden");
+    document.getElementById("step3").classList.remove("hidden");
+}
+
+// Voting
+function vote(candidate) {
+
+    // Hide voting section
+    document.getElementById("step3").style.display = "none";
+
+    // Show full screen result
+    let finalPage = document.getElementById("finalPage");
+    finalPage.style.display = "flex";
+
+    // Message
+    document.getElementById("finalText").innerHTML = 
+        "🎉 Congratulations!<br><br>✅ You voted for <b>" + candidate + "</b>";
+
+    // Play sound
+    document.getElementById("sound").play();
+
+    // Auto redirect after 5 sec
+    setTimeout(() => {
+        location.reload();
+    }, 5000);
+}
+
+async function startFaceLock() {
+
+    const video = document.getElementById('video');
+
+    // camera start
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+
+    await new Promise(resolve => {
+        video.onloadedmetadata = () => resolve();
+    });
+
+    alert("📸 Face scan start... please wait");
+
+    // fake scanning delay (real feel)
+    let progress = 0;
+
+    const scan = setInterval(() => {
+
+        progress++;
+
+        if (progress === 3) {
+            alert("🔍 Checking face...");
+        }
+
+        if (progress === 6) {
+            alert("🧠 Face matched successfully");
+        }
+
+        if (progress >= 8) {
+            clearInterval(scan);
+
+            alert("✅ Face Verified Successfully");
+
+            document.getElementById("step2").classList.add("hidden");
+            document.getElementById("step3").classList.remove("hidden");
+        }
+
+    }, 500);
+}
+</script>
+
+</body>
+</html>
